@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 import { v4 as uuidv4 } from "uuid";
+import { DatePicker } from "@/components/ui/datePicker";
 
 interface Trip {
   id: string;
@@ -42,8 +43,9 @@ export default function CreateTrip(): JSX.Element {
       endDate,
       days: [],
     };
-    localStorage.setItem(trip.id, JSON.stringify(trip));
-    router.push(`/plan/${trip.id}`);
+    console.log(trip);
+    // localStorage.setItem(trip.id, JSON.stringify(trip));
+    // router.push(`/plan/${trip.id}`);
   }
 
   return (
@@ -60,6 +62,7 @@ export default function CreateTrip(): JSX.Element {
           value={location}
           onChange={(e) => setLocation(e.target.value)}
         />
+        <DatePicker placeHolder="起始日期" />
         <Input
           type="date"
           value={startDate}
@@ -71,6 +74,7 @@ export default function CreateTrip(): JSX.Element {
           onChange={(e) => setEndDate(e.target.value)}
         />
         <Button onClick={handleSubmit}>建立計畫</Button>
+        <Button onClick={() => router.push("/")}>回首頁</Button>
       </div>
     </main>
   );
