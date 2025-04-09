@@ -7,12 +7,15 @@ import { useRouter } from "next/navigation";
 
 import { DatePicker } from "@/components/ui/datePicker";
 import { Controller, useForm } from "react-hook-form";
+import { v4 as uuidv4 } from "uuid";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
 
 interface Trip {
   id?: string;
   title: string;
   location: string;
-  date: string;
+  date: number;
   days?: DayPlan[];
 }
 
@@ -27,29 +30,33 @@ interface PlanItem {
   description?: string;
 }
 
+const schema = z.object({
+  title: z.string().min(1),
+  location: z.string().min(1),
+  date: z.number().min(1),
+});
+
 export default function CreateTrip(): JSX.Element {
-  const { register, control, handleSubmit } = useForm({
+  const { register, control, handleSubmit, formState } = useForm({
     defaultValues: {
       title: "",
       location: "",
-      date: "",
+      date: undefined,
     },
+    resolver: zodResolver(schema),
   });
   const router = useRouter();
+  const { isDirty, isValid } = formState;
 
   function submit(data: Trip): void {
-    console.log(data);
-    // const trip: Trip = {
-    //   id: uuidv4(),
-    //   title,
-    //   location,
-    //   startDate,
-    //   endDate,
-    //   days: [],
-    // };
-    // console.log(trip);
-    // localStorage.setItem(trip.id, JSON.stringify(trip));
-    // router.push(`/plan/${trip.id}`);
+    const trip: Trip = {
+      id: uuidv4(),
+      ...data,
+      days: [],
+    };
+    console.log(trip);
+    localStorage.setItem(trip.id!, JSON.stringify(trip));
+    router.push(`/plans/${trip.id}`);
   }
 
   return (
@@ -70,11 +77,14 @@ export default function CreateTrip(): JSX.Element {
                 onChange={(val) => {
                   field.onChange(val ? val.getTime() : undefined);
                 }}
+                onBlur={field.onBlur}
               />
             );
           }}
         />
-        <Button type="submit">建立計畫</Button>
+        <Button type="submit" disabled={!isDirty || !isValid}>
+          建立計畫
+        </Button>
         <Button onClick={() => router.push("/")}>回首頁</Button>
       </form>
     </main>

@@ -14,14 +14,25 @@ type DatePickerProps = {
   value?: Date | number | string;
   onChange: (date?: Date) => void;
   onBlur?: () => void;
-  name?: string;
-  inputRef?: React.Ref<HTMLInputElement>;
 };
 
-export function DatePicker({ placeHolder, value, onChange }: DatePickerProps) {
+export function DatePicker({
+  placeHolder,
+  value,
+  onChange,
+  onBlur,
+}: DatePickerProps) {
   const [open, setOpen] = React.useState(false);
   const displayDate =
     value instanceof Date ? value : value ? new Date(value) : undefined;
+  const [tempValue, setTempValue] = React.useState<Date | undefined>(
+    displayDate
+  );
+
+  React.useEffect(() => {
+    setTempValue(displayDate);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [value]);
   return (
     <>
       <Popover open={open} onOpenChange={setOpen}>
@@ -29,7 +40,7 @@ export function DatePicker({ placeHolder, value, onChange }: DatePickerProps) {
           <Button
             variant="outline"
             className={cn(
-              "w-[248px] justify-start text-left font-normal",
+              "w-[248px] justify-start text-left font-normal active:scale-100",
               !value && "text-muted-foreground"
             )}
             onClick={() => setOpen(true)}
@@ -45,27 +56,17 @@ export function DatePicker({ placeHolder, value, onChange }: DatePickerProps) {
         <PopoverContent align="start" className="w-auto p-0">
           <Calendar
             mode="single"
-            selected={displayDate}
-            onSelect={(e) => {
-              onChange(e);
-            }}
+            selected={tempValue}
+            onSelect={setTempValue}
             footer={
-              <div className="flex gap-2 justify-end mt-2">
+              <div className="flex justify-end">
                 <Button
-                  variant="outline"
                   size="sm"
+                  className="mt-2"
                   onClick={() => {
                     setOpen(false);
-                    onChange(undefined);
-                  }}
-                >
-                  {value ? "清除" : "取消"}
-                </Button>
-                <Button
-                  disabled={!value}
-                  size="sm"
-                  onClick={() => {
-                    setOpen(false);
+                    onChange(tempValue);
+                    onBlur?.();
                   }}
                 >
                   確定
